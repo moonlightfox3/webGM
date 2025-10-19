@@ -4,10 +4,6 @@
         drawMainUI("Pack a GM game dump (use up/down/enter):", gameList)
     }
     
-    let scriptEl = document.createElement("script")
-    scriptEl.src = "./wpck/filesys.js"
-    document.body.append(scriptEl)
-    
     let state = 0
     let dumpName = null
     let dumpPack = null

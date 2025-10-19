@@ -2,6 +2,7 @@ let currentGame = null
 let currentGamePack = null
 let isGameWindow = false
 let hasInited = false
+let readyToStart = false
 let readyToEnd = false
 async function getDataInit () {
     let packResp = await fetch(`./games/${currentGame}.wpck`)
@@ -24,8 +25,12 @@ async function getDataInit () {
 
     if (isGameWindow) {
         hasInited = true
-        gameStart()
+        startGameWindow()
     } else createGameWindow()
+}
+function startGameWindow () {
+    readyToStart = true
+    drawMainUI("Press Enter to start '" + currentGame + "'")
 }
 function createGameWindow () {
     let w = gameInfo.width, h = gameInfo.height
@@ -64,5 +69,5 @@ onload = async function () {
     if (!isGame) {
         gameList = await getGameList()
         drawGameList()
-    } else drawMainUI("Game starting...")
+    } else drawMainUI("Game loading...")
 }

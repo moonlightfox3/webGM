@@ -1,6 +1,6 @@
 fix titlescreen freezing when "begin game" clicked
     game uses while loop for inputs, freezes JS
-fix introlast sprite - ?
+fix introlast sprite not appearing - ?
 
 finish tiles/backgrounds
     import data from rooms about which backgrounds and tiles they use (if any)
@@ -24,7 +24,3 @@ add on to scope variables
 add code between Step and EndStep events (order matters)
     move instances (hspeed, vspeed, <paths>)
     check collison - if 2 things collide and 1 is solid then they both move to their previous frame's position, collision events called for both
-
-sounds stop working sometimes (temporarily)
-    maybe a website security restriction? hopefully not
-    fix at some point if possible

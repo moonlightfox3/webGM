@@ -104,6 +104,7 @@ function checkInstanceExists (nameId) {
 function endGame () {
     fireEventsAllInstances("Other", "GameEnd")
     endMainTickLoop()
+    stopAllSounds()
 
     readyToEnd = true
     drawMainUI("Game ended. Press Enter to quit.")

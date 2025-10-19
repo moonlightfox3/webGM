@@ -105,6 +105,12 @@ onkeydown = function (ev) {
         }
         return
     }
+    if (readyToStart) {
+        if (ev.key == "Enter") {
+            readyToStart = false
+            gameStart()
+        }
+    }
     if (readyToEnd) {
         if (ev.key == "Enter") close()
         return
