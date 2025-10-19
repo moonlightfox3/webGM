@@ -1,17 +1,23 @@
 let currentlyOpenIni = null
 function closeIni () {
-    let file = ""
     if (fileSystem[currentlyOpenIni] == undefined) return ""
+    let file = ""
 
-    for (let section of Object.keys(fileSystem[currentlyOpenIni])) {
-        file += `[${section}]\n`
-        for (let key of Object.keys(fileSystem[currentlyOpenIni][section])) {
-            let val = fileSystem[currentlyOpenIni][section][key]
+    let sections = Object.keys(fileSystem[currentlyOpenIni])
+    for (let i = 0; i < sections.length; i++) {
+        file += `[${sections[i]}]\n`
+        for (let key of Object.keys(fileSystem[currentlyOpenIni][sections[i]])) {
+            let val = fileSystem[currentlyOpenIni][sections[i]][key]
             file += `${key} = "${val}"\n`
         }
+        if (i < sections.length - 1) file += `\n`
     }
-
     fileSystemStr[currentlyOpenIni] = file
+
+    if (currentlyOpenIni.startsWith("<TEMP")) {
+        delete fileSystem[currentlyOpenIni]
+        delete fileSystemStr[currentlyOpenIni]
+    }
     currentlyOpenIni = null
     saveFileSystemToLocalStorage()
     return file
@@ -22,6 +28,31 @@ function writeIni (section, key, val) {
     fileSystem[currentlyOpenIni][section][key] = val
     saveFileSystemToLocalStorage()
 }
+function loadIniFromStr (str) {
+    str = str.trim().replaceAll(/\n\n+/g, "\n")
+
+    currentlyOpenIni = "<TEMP_STROPEN>"
+    fileSystemStr[currentlyOpenIni] = str
+    fileSystem[currentlyOpenIni] = {}
+    let lines = str.split("\n")
+
+    let currentSection = ""
+    for (let line of lines) {
+        if (line.startsWith("[")) {
+            currentSection = line.slice(1, -1)
+            if (fileSystem[currentlyOpenIni][currentSection] == undefined) fileSystem[currentlyOpenIni][currentSection] = {}
+        } else {
+            let equalsIndex = line.indexOf(" = ")
+            let key = line.substring(0, equalsIndex)
+            
+            let val = line.substring(equalsIndex + 3)
+            if (val[0] == "\"") val = val.slice(1, -1)
+            else val = +val
+            
+            fileSystem[currentlyOpenIni][currentSection][key] = val
+        }
+    }
+}
 
 function saveFileSystemToLocalStorage (gameOverride = null) {
     let storage = {fileSystem, fileSystemStr}
@@ -29,8 +60,10 @@ function saveFileSystemToLocalStorage (gameOverride = null) {
 }
 function loadFileSystemFromLocalStorage (gameOverride = null) {
     let storage = JSON.parse(localStorage.getItem(gameOverride || currentGame || "")) || {}
-    fileSystem = storage?.fileSystem || {}
-    fileSystemStr = storage?.fileSystemStr || {}
+    fileSystem = storage?.fileSystem || {}, fileSystemStr = storage?.fileSystemStr || {}
+}
+function clearFileSystemFromLocalStorage (gameOverride = null) {
+    localStorage.removeItem(gameOverride || currentGame || "")
 }
 
 function checkKeyPressed (key) {
@@ -106,8 +139,7 @@ function endGame () {
     endMainTickLoop()
     stopAllSounds()
 
-    readyToEnd = true
-    drawMainUI("Game ended. Press Enter to quit.")
+    close()
 }
 function debugEndGame () {
     console.warn("Ending game... (debug)")
@@ -116,8 +148,8 @@ function debugEndGame () {
 }
 function restartGame() {
     fireEventsAllInstances("Other", "GameEnd")
-    gameStartEventFired = false
-    gameStart()
+    startGameEventFired = false
+    startGame()
 }
 
 let roomBackground = null
@@ -228,7 +260,7 @@ function room_goto (name) {
     
     let copiedInstances = all?.filter(val => val?.persistent) || []
     all = loadRoomInstances()
-    if (gameStartEventFired) all.push(...copiedInstances)
+    if (startGameEventFired) all.push(...copiedInstances)
 
     for (let j = 0; j < all.length; j++) {
         let instance = all[j]
@@ -272,9 +304,9 @@ function room_goto (name) {
     }
 
     fireEventsAllInstances("Create")
-    if (!gameStartEventFired) {
+    if (!startGameEventFired) {
         fireEventsAllInstances("Other", "GameStart")
-        gameStartEventFired = true
+        startGameEventFired = true
     }
     fireEventsAllInstances("Other", "RoomStart")
 }
@@ -285,37 +317,52 @@ function room_goto_previous () {
     room_goto(room - 1)
 }
 function randomize () { return 0 }
-function audio_channel_num () {  }
+function audio_channel_num (num) {  }
 function steam_initialised () { return true }
 function steam_file_exists (name) { return fileSystem[name] != undefined }
 function os_get_language () { return "en" }
-function string_upper (str) { return str.toUpperCase() }
-function string_lower (str) { return str.toLowerCase() }
 function os_get_region () { return "US" }
 function variable_global_exists (name) { return global[name] != undefined }
 function script_execute (name, ...args) { return execScript(name, ...args) }
+function string_upper (str) { return str.toUpperCase() }
+function string_lower (str) { return str.toLowerCase() }
 function string_length (str) { return str.length }
 function string_copy (str, index, count) { return str.substring(index - 1, (index - 1) + count) }
+function string_char_at (str, i) { return i < 1 ? str[0] : i > str.length ? "" : str[i - 1] }
+function string_pos (substr, str) { return str.indexOf(substr) + 1 }
+function string_height (str) { return drawText(0, 0, str, true).heightMax }
+function string_width (str) { return drawText(0, 0, str, true).widthMax }
+function string_replace_all (str, substr, newstr) { return str.replaceAll(substr, newstr) }
+function string_repeat (str, count) { return str.repeat(count) }
 function ds_map_create () { return new Map() }
 function ds_map_set (map, key, val) { map.set(key, val) }
 function ds_map_add (map, key, val) { map.set(key, val) }
-function floor (val) { return Math.floor(val) }
-function window_set_caption (caption) { document.title = `${caption} | webGM` }
+function ds_map_find_value (map, key) { return map.get(key) }
 function ini_open (name) { currentlyOpenIni = name }
+function ini_open_from_string (str) { loadIniFromStr(str) }
+function ini_section_exists (section) { return fileSystem[currentlyOpenIni]?.[section] != undefined }
 function ini_read_string (section, key, fallback) { return fileSystem[currentlyOpenIni]?.[section]?.[key] || fallback }
 function ini_read_real (section, key, fallback) { return +(fileSystem[currentlyOpenIni]?.[section]?.[key] || fallback) }
+function ini_write_string (section, key, val) { writeIni(section, key, val) }
+function ini_write_real (section, key, val) { writeIni(section, key, val) }
 function ini_close () { return closeIni() }
 function file_exists (name) { return fileSystem[name] != undefined }
 function sprite_prefetch (name) { loadSprite(name); return 0 }
-function window_get_width () { return canvasEl.width }
-function window_get_height () { return canvasEl.height }
 function surface_get_width (id) { return canvasEl.width }
 function surface_get_height (id) { return canvasEl.height }
-function min (...vals) { return Math.min(...vals) }
-function draw_set_font (name) { setFont(name) }
-function draw_set_color (color) { drawCtx.fillStyle = drawCtx.strokeStyle = color }
 function joystick_exists (id) { return joysticksList.indexOf(id) > -1 }
+function min (...vals) { return Math.min(...vals) }
+function max (...vals) { return Math.max(...vals) }
+function floor (val) { return Math.floor(val) }
 function round (val) { return Math.round(val) }
+function ceil (val) { return Math.ceil(val) }
+function abs (val) { return Math.abs(val) }
+function sin (val) { return Math.sin(val) }
+function cos (val) { return Math.cos(val) }
+function power (val, exp) { return val ** exp }
+function sqr (val) { return val ** 2 }
+function sqrt (val) { return Math.sqrt(val) }
+function degtorad (deg) { return deg * Math.PI / 180 }
 function ord (str) { return str.charCodeAt(0) }
 function chr (val) { return String.fromCharCode(val) }
 function keyboard_check (key) { return heldKeys.indexOf(key) > -1 }
@@ -325,37 +372,37 @@ function keyboard_check_direct (key) { return heldKeys.indexOf(key) > -1 }
 function keyboard_clear (key) { clearKey(key) }
 function instance_create (x, y, name) { return createInstance(x, y, name) }
 function audio_play_sound (name, priority, loop) { return playSound(name, priority, loop) }
-function ds_map_find_value (map, key) { return map.get(key) }
 function is_undefined (val) { return val == undefined }
 function audio_sound_pitch (sound, pitch) { setSoundPitch(sound, pitch) }
 function audio_sound_gain (sound, vol, time) { setSoundGain(sound, vol, time) }
-function draw_rectangle (x1, y1, x2, y2, isOnlyOutline) { drawRawRectangle(x1, y1, x2, y2, isOnlyOutline) }
-function draw_circle (x, y, r, isOnlyOutline) { drawRawCircle(x, y, r, isOnlyOutline) }
 function instance_exists (name) { return checkInstanceExists(name) }
 function audio_stop_sound (sound) { stopSound(sound) }
-function draw_sprite (sprite, frame, x, y) { drawSpriteStatic(sprite, frame, x, y) }
 function game_end () { endGame() }
 function game_restart () { restartGame() }
-function ini_section_exists (section) { return fileSystem[currentlyOpenIni]?.[section] != undefined }
-function string_char_at (str, i) { return i < 1 ? str[0] : i > str.length ? "" : str[i - 1] }
-function string_pos (substr, str) { return str.indexOf(substr) + 1 }
-function string_height (str) { return drawText(0, 0, str, true).heightMax }
-function string_width (str) { return drawText(0, 0, str, true).widthMax }
+function draw_set_font (name) { setFont(name) }
+function draw_set_color (color) { drawCtx.fillStyle = drawCtx.strokeStyle = color }
+function draw_line (x1, y1, x2, y2) { drawRawLine(x1, y1, x2, y2) }
+function draw_rectangle (x1, y1, x2, y2, isOnlyOutline) { drawRawRectangle(x1, y1, x2, y2, isOnlyOutline) }
+function draw_circle (x, y, r, isOnlyOutline) { drawRawCircle(x, y, r, isOnlyOutline) }
 function draw_text (x, y, str) { drawText(x, y, str) }
 function draw_text_transformed (x, y, str, scaleX, scaleY, angle) { drawTextTransformed(x, y, str, scaleX, scaleY, angle) }
 function draw_text_transformed_color (x, y, str, scaleX, scaleY, angle, c1, c2, c3, c4, alpha) { drawTextTransformed(x, y, str, scaleX, scaleY, angle, c1, c2, c3, c4, alpha) }
-function random (max) { return Math.random() *  max }
-function audio_stop_all () { stopAllSounds() }
-function window_get_fullscreen () { return isFullscreen }
-function window_set_fullscreen (fullscreen) { fullscreen ? mainCanvasEl.requestFullscreen() : (document.fullscreenElement != null ? document.exitFullscreen() : null); isFullscreen = fullscreen }
 function draw_set_halign (type) { textAlignH = type }
-function ini_write_string (section, key, val) { writeIni(section, key, val) }
-function ini_write_real (section, key, val) { writeIni(section, key, val) }
-function joystick_buttons (id) { return joysticksList[id]?.length || 0 }
+function draw_sprite (sprite, frame, x, y) { drawSpriteStatic(sprite, frame, x, y) }
 function draw_sprite_ext (sprite, frame, x, y, scaleX, scaleY, angle, blendColor, alpha) { drawSpriteStatic(sprite, frame, x, y, scaleX, scaleY, angle, blendColor, alpha) }
-function string_replace_all (str, substr, newstr) { return str.replaceAll(substr, newstr) }
-function real (str) { return parseInt(str) }
 function draw_sprite_part (sprite, frame, left, top, w, h, x, y) { drawSpriteStaticPart(sprite, frame, left, top, w, h, x, y) }
 function draw_background (bg, x, y) { drawBackground(bg, x, y) }
+function random (max) { return Math.random() * max }
+function irandom (max) { return Math.floor(Math.random() * (max + 1)) }
+function audio_stop_all () { stopAllSounds() }
+function window_set_caption (caption) { document.title = `${caption} | webGM` }
+function window_get_width () { return canvasEl.width }
+function window_get_height () { return canvasEl.height }
+function window_get_x () { return screenX }
+function window_get_y () { return screenY }
+function window_get_fullscreen () { return isFullscreen }
+function window_set_fullscreen (fullscreen) { fullscreen ? mainCanvasEl.requestFullscreen() : (document.fullscreenElement != null ? document.exitFullscreen() : null); isFullscreen = fullscreen }
+function joystick_buttons (id) { return joysticksList[id]?.length || 0 }
+function real (str) { return parseInt(str) }
 function room_get_name (room) { return getRoomName(room) }
 function string (...args) { return formatString(...args) }

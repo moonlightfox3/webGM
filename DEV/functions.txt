@@ -27,7 +27,7 @@ audio_sound_get_pitch
 audio_sound_get_gain
     audio_stop_all
 audio_pause_sound
-sin
+    sin
 draw_sprite_part_ext
 draw_background_part_ext
 make_color_rgb
@@ -40,8 +40,8 @@ draw_set_alpha
 surface_create
 surface_set_target
 draw_clear_alpha
-irandom
-ceil
+    irandom
+    ceil
 draw_point_color
 surface_reset_target
 draw_surface
@@ -51,13 +51,13 @@ surface_free
     draw_sprite_part
 sprite_get_width
 sprite_get_height
-abs
+    abs
     min
-room_goto
+    room_goto
     string_char_at
     ord
     draw_text_transformed
-room_goto_next
+    room_goto_next
     string_length
     draw_text
     keyboard_check_pressed
@@ -79,7 +79,7 @@ file_text_write_string
     file_exists
 file_delete
 steam_file_delete
-cos
+    cos
     instance_destroy
 draw_set_colour
     draw_set_font
@@ -102,7 +102,7 @@ file_text_writeln
     game_end
     ini_close
     ini_open
-ini_open_from_string
+    ini_open_from_string
 buffer_async_group_begin
 buffer_async_group_option
 buffer_create
@@ -130,7 +130,7 @@ lengthdir_y
 lengthdir_x
     draw_circle
     ini_read_string
-room_goto_previous
+    room_goto_previous
     action_move_to
     action_kill_object
 joystick_has_pov
@@ -149,7 +149,7 @@ draw_getpixel
 sprite_get_name
 draw_rectangle_color
 draw_line_width
-power
+    power
 action_set_gravity
 action_set_hspeed
 action_move
@@ -159,11 +159,11 @@ path_start
 path_end
 draw_self
 sprite_delete
-degtorad
+    degtorad
 collision_line
 collision_rectangle
 point_direction
-draw_line
+    draw_line
 room_restart
 point_distance
 move_snap
@@ -174,12 +174,12 @@ draw_triangle
 file_rename
     window_set_fullscreen
 window_center
-window_get_x
-window_get_y
+    window_get_x
+    window_get_y
 window_set_position
 steam_file_write_file
     keyboard_check_direct
-string_repeat
+    string_repeat
 draw_triangle_color
 draw_line_width_color
 collision_circle
@@ -211,8 +211,8 @@ gamepad_get_device_count
 gamepad_is_connected
     joystick_exists
 gamepad_axis_value
-sqr
-sqrt
+    sqr
+    sqrt
 darctan2
 joystick_xpos
 joystick_ypos
@@ -228,7 +228,7 @@ buffer_delete
     surface_get_height
 texture_set_interpolation
 draw_surface_ext
-max
+    max
 os_is_paused
 audio_pause_all
 instance_deactivate_all

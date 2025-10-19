@@ -1,6 +1,8 @@
+fix introlast sprite not appearing - ?
+fix intro sprites not fading
+fix quitting message not ending with a period?
 fix titlescreen freezing when "begin game" clicked
     game uses while loop for inputs, freezes JS
-fix introlast sprite not appearing - ?
 
 finish tiles/backgrounds
     import data from rooms about which backgrounds and tiles they use (if any)

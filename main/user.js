@@ -108,12 +108,8 @@ onkeydown = function (ev) {
     if (readyToStart) {
         if (ev.key == "Enter") {
             readyToStart = false
-            gameStart()
+            startGame()
         }
-    }
-    if (readyToEnd) {
-        if (ev.key == "Enter") close()
-        return
     }
 
     let keyCode = getKeyCode(ev.key)
@@ -130,7 +126,6 @@ onkeydown = function (ev) {
 }
 onkeyup = function (ev) {
     if (!hasInited) return
-    if (readyToEnd) return
     
     let keyCode = getKeyCode(ev.key)
     let vkKeyIndex = Object.values(vkKeys).indexOf(keyCode)

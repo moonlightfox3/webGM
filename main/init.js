@@ -3,7 +3,6 @@ let currentGamePack = null
 let isGameWindow = false
 let hasInited = false
 let readyToStart = false
-let readyToEnd = false
 async function getDataInit () {
     let packResp = await fetch(`./games/${currentGame}.wpck`)
     let packBuf = await packResp.arrayBuffer()
@@ -25,12 +24,9 @@ async function getDataInit () {
 
     if (isGameWindow) {
         hasInited = true
-        startGameWindow()
+        readyToStart = true
+        drawStartGameWindow()
     } else createGameWindow()
-}
-function startGameWindow () {
-    readyToStart = true
-    drawMainUI("Press Enter to start '" + currentGame + "'")
 }
 function createGameWindow () {
     let w = gameInfo.width, h = gameInfo.height
@@ -44,13 +40,19 @@ function createGameWindow () {
     let win = open(`${url}?game=${currentGame}`, "_blank", `popup,width=${w},height=${h},left=${x},top=${y}`)
     if (win == null) return
 }
-function gameStart () {
-    room_goto(0)
-    startMainTickLoop()
+function drawLoadingGameWindow () {
+    drawMainUI("Game loading...")
 }
 let gameList = null
 function drawGameList () {
     drawMainUI("Select a GM game to play (use up/down/enter):", gameList)
+}
+function drawStartGameWindow () {
+    drawMainUI("Press Enter to start '" + currentGame + "'")
+}
+function startGame () {
+    room_goto(0)
+    startMainTickLoop()
 }
 
 function checkUrlParam () {
@@ -69,5 +71,8 @@ onload = async function () {
     if (!isGame) {
         gameList = await getGameList()
         drawGameList()
-    } else drawMainUI("Game loading...")
+    } else {
+        gameList = []
+        drawLoadingGameWindow()
+    }
 }

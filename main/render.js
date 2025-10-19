@@ -114,7 +114,9 @@ function resizeRenderer () {
         canvasEl.height = mainCanvasEl.height
         drawCtx.imageSmoothingEnabled = false
         
-        if (!hasInited) drawGameList()
+        if (gameList == null) drawLoadingGameWindow()
+        else if (!hasInited) drawGameList()
+        else if (readyToStart) drawStartGameWindow()
     }
 }
 onresize = resizeRenderer
@@ -126,4 +128,10 @@ function drawRawCircle (x, y, r, isOnlyOutline = false) {
     drawCtx.beginPath()
     drawCtx.arc(drawScreenX + (x * drawScaleX), drawScreenY + (y * drawScaleY), r * drawScaleX, 0, Math.PI * 2)
     drawCtx[isOnlyOutline ? "stroke" : "fill"]()
+}
+function drawRawLine (x1, y1, x2, y2) {
+    drawCtx.beginPath()
+    drawCtx.moveTo(drawScreenX + (x1 * drawScaleX), drawScreenY + (y1 * drawScaleY))
+    drawCtx.lineTo(drawScreenX + (x2 * drawScaleX), drawScreenY + (y2 * drawScaleY))
+    drawCtx.stroke()
 }

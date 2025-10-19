@@ -1,9 +1,9 @@
 let shouldRunMainTickLoop = false
-let gameStartEventFired = false
-let gameStartTime = null
+let startGameEventFired = false
+let startGameTime = null
 let lastTickTime = null
 async function mainTick (timestamp) {
-    if (gameStartTime == null) gameStartTime = timestamp
+    if (startGameTime == null) startGameTime = timestamp
     current_time = timestamp || 0
     let deltaTime = (current_time - (lastTickTime || 0)) * 1000
     if (shouldRunMainTickLoop) requestAnimationFrame(mainTick)
