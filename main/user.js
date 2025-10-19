@@ -90,26 +90,27 @@ let heldKeys = []
 let releasedKeys = []
 onkeydown = function (ev) {
     if (ev.repeat) return
-    if (!hasInited) {
-        if (ev.key == "ArrowUp") {
-            if (uiSelectPos > 0) uiSelectPos--
-            drawGameList()
-        } else if (ev.key == "ArrowDown") {
-            if (uiSelectPos < gameList.length - 1) uiSelectPos++
-            drawGameList()
-        } else if (ev.key == "Enter") {
-            if (gameList.length > 0) {
+    if (gameList == null) return
+    else if (!hasInited) {
+        if (gameList.length > 0) {
+            if (ev.key == "ArrowUp") {
+                if (uiSelectPos > 0) uiSelectPos--
+                drawGameList()
+            } else if (ev.key == "ArrowDown") {
+                if (uiSelectPos < gameList.length - 1) uiSelectPos++
+                drawGameList()
+            } else if (ev.key == "Enter") {
                 currentGame = gameList[uiSelectPos]
                 getDataInit()
             }
         }
         return
-    }
-    if (readyToStart) {
+    } else if (readyToStart) {
         if (ev.key == "Enter") {
             readyToStart = false
             startGame()
         }
+        return
     }
 
     let keyCode = getKeyCode(ev.key)
@@ -126,6 +127,7 @@ onkeydown = function (ev) {
 }
 onkeyup = function (ev) {
     if (!hasInited) return
+    if (gameList == null || !hasInited || readyToStart) return
     
     let keyCode = getKeyCode(ev.key)
     let vkKeyIndex = Object.values(vkKeys).indexOf(keyCode)
