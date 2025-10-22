@@ -1,3 +1,5 @@
+add builtin util for external game loading (.wpck files not included in /games)
+
 fix introlast sprite not appearing - ?
 fix intro sprites not fading
 fix quitting message not ending with a period?
